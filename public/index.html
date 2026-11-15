@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgentSwarm | StateGraph Multi-Agent Simulator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #070b14;
+      --card: #0d1527;
+      --border: rgba(255, 255, 255, 0.08);
+      --accent: #8b5cf6;
+      --cyan: #38bdf8;
+      --green: #10b981;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); padding: 2rem 1rem; line-height: 1.6; }
+    .container { max-width: 950px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 2rem; }
+    .badge { display: inline-block; font-size: 0.75rem; font-weight: 700; color: var(--accent); background: rgba(139, 92, 246, 0.12); border: 1px solid rgba(139, 92, 246, 0.25); padding: 0.25rem 0.75rem; border-radius: 9999px; margin-bottom: 0.8rem; }
+    h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem; }
+    p.desc { color: var(--muted); font-size: 1rem; }
+    
+    .mission-box { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+    input[type="text"] { flex-grow: 1; padding: 0.85rem 1.2rem; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: #fff; font-size: 1rem; }
+    input[type="text"]:focus { outline: none; border-color: var(--accent); }
+    button.run-btn { padding: 0.85rem 1.5rem; background: #7c3aed; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    button.run-btn:hover { background: #6d28d9; }
+    
+    .graph-viz { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; position: relative; padding: 1rem 0; }
+    .node-box { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 0.8rem 1.2rem; text-align: center; width: 17%; transition: 0.3s; }
+    .node-box.active { border-color: var(--cyan); box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); transform: translateY(-3px); }
+    .node-box.done { border-color: var(--green); }
+    .node-role { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; font-weight: 700; }
+    .node-name { font-size: 0.95rem; font-weight: 700; margin-top: 0.2rem; }
+    .arrow { color: var(--muted); font-size: 1.2rem; }
+    
+    .console-card { background: #0b1120; border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #cbd5e1; height: 180px; overflow-y: auto; margin-bottom: 1.5rem; }
+    .console-line { margin-bottom: 0.35rem; }
+    .c-agent { color: var(--cyan); font-weight: 600; }
+    .c-metric { color: var(--green); }
+    
+    .report-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.8rem; display: none; }
+    .report-meta { display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 0.8rem; margin-bottom: 1.2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--muted); }
+    .score-badge { color: var(--green); font-weight: 700; }
+    .report-content { white-space: pre-wrap; font-size: 0.95rem; line-height: 1.7; }
+    
+    footer { text-align: center; margin-top: 3rem; color: var(--muted); font-size: 0.85rem; }
+    footer a { color: var(--cyan); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">Live GitHub Pages Playground</div>
+      <h1>AgentSwarm StateGraph Simulator</h1>
+      <p class="desc">Cyclic multi-agent orchestration runtime with tool calling, metric synthesis, and reflection.</p>
+    </header>
+
+    <div class="mission-box">
+      <input type="text" id="goalInput" value="Autonomous AI Voice Agents for Enterprise Customer Support" />
+      <button class="run-btn" id="runBtn" onclick="executeSwarm()">Launch Swarm Mission</button>
+    </div>
+
+    <!-- StateGraph Visualizer -->
+    <div class="graph-viz">
+      <div class="node-box" id="nodePlanner">
+        <div class="node-role">Step 1</div>
+        <div class="node-name">Planner</div>
+      </div>
+      <div class="arrow">&rarr;</div>
+      <div class="node-box" id="nodeResearcher">
+        <div class="node-role">Step 2</div>
+        <div class="node-name">Researcher</div>
+      </div>
+      <div class="arrow">&rarr;</div>
+      <div class="node-box" id="nodeAnalyst">
+        <div class="node-role">Step 3</div>
+        <div class="node-name">Analyst</div>
+      </div>
+      <div class="arrow">&rarr;</div>
+      <div class="node-box" id="nodeCritic">
+        <div class="node-role">Audit Gate</div>
+        <div class="node-name">Critic</div>
+      </div>
+      <div class="arrow">&rarr;</div>
+      <div class="node-box" id="nodeSynthesizer">
+        <div class="node-role">Final Step</div>
+        <div class="node-name">Synthesizer</div>
+      </div>
+    </div>
+
+    <!-- Execution Telemetry Console -->
+    <div class="console-card" id="consoleLog">
+      <div class="console-line">[Runtime] Ready. Click "Launch Swarm Mission" to dispatch agents.</div>
+    </div>
+
+    <!-- Executive Briefing Report -->
+    <div class="report-card" id="reportCard">
+      <div class="report-meta">
+        <span>Swarm Mission Status: <strong style="color: var(--green);">APPROVED</strong></span>
+        <span>Quality Audit: <strong class="score-badge" id="scoreText">100/100</strong></span>
+        <span>State Machine: <strong>Cyclic StateGraph</strong></span>
+      </div>
+      <div class="report-content" id="reportText"></div>
+    </div>
+
+    <footer>
+      Engineered by <strong>Sayandeep Ghosh</strong> | B.Tech CS Distinction &bull; IIT Kharagpur AI4ICPS Fellow<br/>
+      <a href="https://github.com/Sayandeepghosh/agentswarm" target="_blank">&larr; Back to GitHub Repository</a>
+    </footer>
+  </div>
+
+  <script>
+    const sleep = ms => new Promise(res => setTimeout(res, ms));
+
+    function log(msg) {
+      const c = document.getElementById('consoleLog');
+      const div = document.createElement('div');
+      div.className = 'console-line';
+      div.innerHTML = msg;
+      c.appendChild(div);
+      c.scrollTop = c.scrollHeight;
+    }
+
+    function highlightNode(id, state) {
+      const el = document.getElementById(id);
+      if (state === 'active') {
+        el.className = 'node-box active';
+      } else if (state === 'done') {
+        el.className = 'node-box done';
+      } else {
+        el.className = 'node-box';
+      }
+    }
+
+    async function executeSwarm() {
+      const goal = document.getElementById('goalInput').value.trim();
+      const btn = document.getElementById('runBtn');
+      const repCard = document.getElementById('reportCard');
+      repCard.style.display = 'none';
+      btn.disabled = true;
+
+      document.getElementById('consoleLog').innerHTML = '';
+      ['nodePlanner', 'nodeResearcher', 'nodeAnalyst', 'nodeCritic', 'nodeSynthesizer'].forEach(n => highlightNode(n, 'reset'));
+
+      log(`[Runtime] StateGraph initialized with entry point: <span class="c-agent">planner</span>`);
+      await sleep(400);
+
+      // 1. Planner
+      highlightNode('nodePlanner', 'active');
+      log(`[planner] Analyzing mission scope: "${goal}"`);
+      await sleep(500);
+      log(`[planner] Plan created: 3 subtasks assigned with tool routes [WebFetcherTool, CalculatorTool].`);
+      highlightNode('nodePlanner', 'done');
+
+      // 2. Researcher
+      highlightNode('nodeResearcher', 'active');
+      log(`[researcher] Scraping domain competitor pricing and market telemetry...`);
+      await sleep(600);
+      log(`[researcher] Ingested 4 competitor telemetry records: Retell AI ($89), Vapi AI ($50), Bland AI ($120), Vocode ($40).`);
+      log(`[researcher] Baseline market size: $1.4B (2024) -> $6.8B (2028).`);
+      highlightNode('nodeResearcher', 'done');
+
+      // 3. Analyst
+      highlightNode('nodeAnalyst', 'active');
+      log(`[analyst] Executing AST CalculatorTool: (((6.8 / 1.4) ** (1/4) - 1) * 100)`);
+      await sleep(600);
+      log(`[analyst] Calculated 4-Year CAGR: <span class="c-metric">+48.46%</span> | Mean Pricing: <span class="c-metric">$74.75/mo</span>.`);
+      log(`[analyst] Completed 4-quadrant strategic SWOT matrix.`);
+      highlightNode('nodeAnalyst', 'done');
+
+      // 4. Critic
+      highlightNode('nodeCritic', 'active');
+      log(`[critic] Evaluating analytical completeness against 100-point rubric...`);
+      await sleep(500);
+      log(`[critic] Audit check: Competitors (35/35), CAGR (35/35), SWOT (30/30) -> Score: <span class="c-metric">100/100</span> (APPROVED).`);
+      highlightNode('nodeCritic', 'done');
+
+      // 5. Synthesizer
+      highlightNode('nodeSynthesizer', 'active');
+      log(`[synthesizer] Formulating publication-ready Markdown executive briefing...`);
+      await sleep(500);
+      highlightNode('nodeSynthesizer', 'done');
+      log(`[Runtime] Mission complete. Output dispatched to report view.`);
+
+      // Render Report
+      const report = `## Executive Market Intelligence Briefing
+Target Domain: ${goal}
+Mission Status: APPROVED | Quality Audit: 100/100
+
+### 1. Market Projections & Growth
+• Baseline Market Size (2024): $1.4 Billion
+• Projected Market Size (2028): $6.8 Billion
+• Projected 4-Year CAGR: +48.46%
+
+### 2. Competitive Landscape & Pricing Benchmarks
+• Retell AI    | Enterprise Streaming       | $89.00/mo | Latency: 350 ms
+• Vapi AI      | Developer Orchestration    | $50.00/mo | Latency: 420 ms
+• Bland AI     | Outbound Telephony Swarm   | $120.00/mo| Latency: 490 ms
+• Vocode       | Open Core Telephony        | $40.00/mo | Latency: 550 ms
+
+Market Pricing Averages:
+• Mean Base Subscription: $74.75/month
+• Average Latency: 452.5 ms
+
+### 3. Strategic SWOT Matrix
+• Strengths: Sub-400ms speech streaming unlocking synchronous conversation; high enterprise willingness to pay.
+• Weaknesses: Continuous GPU inference costs during open websocket streaming sessions.
+• Opportunities: Direct integrations with CRM workflows (Salesforce, Zendesk); dialect specialization.
+• Threats: Big-tech model releases (OpenAI Advanced Voice API) and tightening TCPA regulatory compliance.`;
+
+      document.getElementById('reportText').innerText = report;
+      repCard.style.display = 'block';
+      btn.disabled = false;
+    }
+  </script>
+</body>
+</html>

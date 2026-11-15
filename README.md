@@ -1,11 +1,15 @@
 # agentswarm
 
-[![CI Tests](https://img.shields.io/badge/pytest-passing-brightgreen.svg)]()
+[![CI Tests](https://github.com/Sayandeepghosh/agentswarm/actions/workflows/ci.yml/badge.svg)](https://github.com/Sayandeepghosh/agentswarm/actions)
+[![Live Demo](https://img.shields.io/badge/Demo-Live%20GitHub%20Pages-blue.svg)](https://sayandeepghosh.github.io/agentswarm/)
 [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.14-blue.svg)]()
 [![Architecture](https://img.shields.io/badge/Architecture-Cyclic%20StateGraph-purple.svg)]()
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)]()
 [![License](https://img.shields.io/badge/License-MIT-green.svg)]()
 
 A lightweight, deterministic multi-agent state graph orchestration framework featuring cyclic execution, typed Pydantic state machines, AST-safe tool calling, and automated reflection.
+
+🔗 **Live Interactive Swarm Simulator:** [https://sayandeepghosh.github.io/agentswarm/](https://sayandeepghosh.github.io/agentswarm/)
 
 ---
 
